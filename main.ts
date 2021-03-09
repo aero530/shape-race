@@ -6,7 +6,8 @@ namespace SpriteKind {
     export const RocketTile = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.EndPortal, function (sprite, otherSprite) {
-    game.over(true)
+    otherSprite.destroy()
+    buildLevel()
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.GravityFlip, function (sprite, otherSprite) {
     gravitySign = gravitySign * -1
@@ -39,6 +40,32 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Coin, function (sprite, otherSpr
     info.changeScoreBy(1)
     otherSprite.destroy(effects.confetti, 500)
 })
+function createTilemapSprites () {
+    for (let value of tiles.getTilesByType(assets.tile`tile3`)) {
+        tiles.setTileAt(value, assets.tile`tile5`)
+        tiles.placeOnTile(createTriangle(), value)
+    }
+    for (let value2 of tiles.getTilesByType(assets.tile`tile4`)) {
+        tiles.setTileAt(value2, assets.tile`tile5`)
+        tiles.placeOnTile(createEndPortal(), value2)
+    }
+    for (let value3 of tiles.getTilesByType(assets.tile`tile6`)) {
+        tiles.setTileAt(value3, assets.tile`tile5`)
+        tiles.placeOnTile(createMonster(), value3)
+    }
+    for (let value4 of tiles.getTilesByType(assets.tile`tile7`)) {
+        tiles.setTileAt(value4, assets.tile`tile5`)
+        tiles.placeOnTile(createCoin(), value4)
+    }
+    for (let value5 of tiles.getTilesByType(assets.tile`tile9`)) {
+        tiles.setTileAt(value5, assets.tile`tile5`)
+        tiles.placeOnTile(createGravityFlip(), value5)
+    }
+    for (let value6 of tiles.getTilesByType(assets.tile`tile10`)) {
+        tiles.setTileAt(value6, assets.tile`tile5`)
+        tiles.placeOnTile(createRocket(), value6)
+    }
+}
 function createCoin () {
     coin = sprites.create(img`
         . . . . . . f f f . . . . . . . 
@@ -92,6 +119,16 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
+function buildLevel () {
+    if (nextLevel == levels.length) {
+        game.over(true)
+    }
+    destroyTilemapSprites()
+    tiles.loadMap(levels[nextLevel])
+    createTilemapSprites()
+    tiles.placeOnTile(mySprite, tiles.getTileLocation(0, 6))
+    nextLevel += 1
+}
 function createMonster () {
     monster = sprites.create(img`
         . . . . . . . . . . . . . . . . 
@@ -165,6 +202,23 @@ function createRocket () {
     rocket.z = 10
     return rocket
 }
+function destroyTilemapSprites () {
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        value.destroy()
+    }
+    for (let value of sprites.allOfKind(SpriteKind.EndPortal)) {
+        value.destroy()
+    }
+    for (let value of sprites.allOfKind(SpriteKind.Coin)) {
+        value.destroy()
+    }
+    for (let value of sprites.allOfKind(SpriteKind.GravityFlip)) {
+        value.destroy()
+    }
+    for (let value of sprites.allOfKind(SpriteKind.RocketTile)) {
+        value.destroy()
+    }
+}
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     game.over(false)
 })
@@ -174,21 +228,14 @@ let monster: Sprite = null
 let triangle: Sprite = null
 let coin: Sprite = null
 let gravityFlip: Sprite = null
+let nextLevel = 0
 let allowDoubleJump = false
 let gravitySign = 0
 let jumpValue = 0
 let gravityValue = 0
 let mySprite: Sprite = null
-tiles.setTilemap(tiles.createTilemap(hex`50000800080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080808080805050505050505050505050505050505050505050905050505050605050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050405050505050505050505050505050507050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050903050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050505050501010101010505050505050a0505050505010101010101050505030505050505030505050501010101010105050505050505050505050505050505010101010101010101010101010101010101010101020202020201010101010101010101010102020202020201010101010101010101010101010202020202020101010101010101010101010101010102020202020202020202020202020202020202020202020202020202`, img`
-    22222222222222222222222222222222222222222222222222222222222222222222222222222222
-    ................................................................................
-    ................................................................................
-    ................................................................................
-    ................................................................................
-    .........................................................................22222..
-    ..........222222..............222222................2222222222222222222222222222
-    22222222222222222222222222222222222222222222222222222222222222222222222222222222
-    `, [myTiles.transparency16,myTiles.tile1,myTiles.tile2,myTiles.tile3,myTiles.tile4,myTiles.tile5,myTiles.tile6,myTiles.tile7,myTiles.tile8,myTiles.tile9,myTiles.tile10], TileScale.Sixteen))
+let levels: tiles.WorldMap[] = []
+levels = [tiles.createMap(tilemap`level5`), tiles.createMap(tilemap`level2`), tiles.createMap(tilemap`level0`)]
 mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
@@ -208,37 +255,14 @@ mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     `, SpriteKind.Player)
 scene.cameraFollowSprite(mySprite)
-tiles.placeOnTile(mySprite, tiles.getTileLocation(0, 6))
 gravityValue = 400
 jumpValue = -200
 gravitySign = 1
 allowDoubleJump = false
+nextLevel = 0
 mySprite.ay = gravitySign * gravityValue
 mySprite.setVelocity(70, 0)
-for (let value of tiles.getTilesByType(myTiles.tile3)) {
-    tiles.setTileAt(value, myTiles.tile5)
-    tiles.placeOnTile(createTriangle(), value)
-}
-for (let value of tiles.getTilesByType(myTiles.tile4)) {
-    tiles.setTileAt(value, myTiles.tile5)
-    tiles.placeOnTile(createEndPortal(), value)
-}
-for (let value of tiles.getTilesByType(myTiles.tile6)) {
-    tiles.setTileAt(value, myTiles.tile5)
-    tiles.placeOnTile(createMonster(), value)
-}
-for (let value of tiles.getTilesByType(myTiles.tile7)) {
-    tiles.setTileAt(value, myTiles.tile5)
-    tiles.placeOnTile(createCoin(), value)
-}
-for (let value of tiles.getTilesByType(myTiles.tile9)) {
-    tiles.setTileAt(value, myTiles.tile5)
-    tiles.placeOnTile(createGravityFlip(), value)
-}
-for (let value of tiles.getTilesByType(myTiles.tile10)) {
-    tiles.setTileAt(value, myTiles.tile5)
-    tiles.placeOnTile(createRocket(), value)
-}
+buildLevel()
 game.onUpdate(function () {
     if (mySprite.vx == 0) {
         mySprite.vx = 50
