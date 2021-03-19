@@ -256,6 +256,7 @@ let gravitySign = 0
 let nextLevel = 0
 let mySprite: Sprite = null
 let levels: tiles.WorldMap[] = []
+music.setVolume(10)
 levels = [tiles.createMap(tilemap`level_1`), tiles.createMap(tilemap`level_2`), tiles.createMap(tilemap`level_3`)]
 mySprite = sprites.create(img`
     . . . . . . . . . . . . . . . . 
